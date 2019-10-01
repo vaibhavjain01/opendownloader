@@ -12,12 +12,22 @@ type DownloaderServer struct {
 	LogObj Logger
 	UtilityObj Utility
 	_downloader Downloader
+	_mySqlUtility MySqlUtility
 }
 
 func (server DownloaderServer) StartServer(port int) {
 	server.LogObj.LogToConsole("Starting Download Server")
+
+	server._mySqlUtility.Username = "root"
+	server._mySqlUtility.Password = "Password1@"
+	server._mySqlUtility.DbName = "opendownloader"
+	server._mySqlUtility.LogObj = server.LogObj
+	server._mySqlUtility.InsertIntoLinks("www.link.com")
+
 	server._downloader.LogObj = server.LogObj
 	server._downloader.UtilityObj = server.UtilityObj
+	server._downloader.MySqlUtilityObj = server._mySqlUtility
+
 	server._echo = echo.New()
 	server.initRoutes()
 	server.startListening(port)

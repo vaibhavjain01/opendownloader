@@ -9,6 +9,7 @@ import (
 type Downloader struct {
 	LogObj Logger
 	UtilityObj Utility
+	MySqlUtilityObj	MySqlUtility
 }
 
 type AudioInfoJson struct {
