@@ -34,9 +34,14 @@ type AvailableFormatsJson struct {
 	AvailableVideoFormats	[]*VideoInfoJson	`json: availableVideoFormats`
 }
 
+type DownloadedMediaJson struct {
+	URL	string	`json: url`
+	DownloadedURL	string	`json: downloadedUrl`
+}
+
 func (downloader Downloader) CheckAvailableFormats(targetUrl string) (*AvailableFormatsJson) {
 	downloader.LogObj.LogToConsole("Checking Available Formats on link: " + targetUrl)
-	out, err := exec.Command("sh", "-c", "./udlbin/youtube-dl -F https://www.youtube.com/watch?v=gtlwZQsBLwA").Output()
+	out, err := exec.Command("sh", "-c", "./udlbin/youtube-dl -F " + targetUrl).Output()
 	if err != nil {
 		downloader.LogObj.LogToConsole("Could not find information. Error Occurred")
 		downloader.LogObj.LogToConsole(err.Error())
@@ -60,6 +65,7 @@ func (downloader Downloader) CheckAvailableFormats(targetUrl string) (*Available
 		}
 		
 		var availableFormatsJson AvailableFormatsJson
+		availableFormatsJson.URL = targetUrl
 		availableFormatsJson.AvailableAudioFormats =  make([]*AudioInfoJson, listAudioJson.Len())
 		availableFormatsJson.AvailableVideoFormats =  make([]*VideoInfoJson, listVideoJson.Len())
 
@@ -113,5 +119,22 @@ func (downloader Downloader) _convertMediaInfoToJson(mediaInfo string) (*AudioIn
 		videoInfoJson.MediaSize = remaining
 
 		return nil, videoInfoJson
+	}
+}
+
+func (downloader Downloader) BeginDownload (targetUrl string, targetFormatCode string) (*DownloadedMediaJson) {
+	downloader.LogObj.LogToConsole("Downloading media from link: " + targetUrl + ", with extension: " + targetFormatCode)
+	out, err := exec.Command("sh", "-c", "./udlbin/youtube-dl -f " + targetFormatCode + " " + targetUrl).Output()
+	if err != nil {
+		downloader.LogObj.LogToConsole("Could not find information. Error Occurred")
+		downloader.LogObj.LogToConsole(err.Error())
+		return nil
+	} else {
+		var downloadedMediaJson DownloadedMediaJson
+		downloadedMediaJson.URL = targetUrl
+		downloadedMediaJson.DownloadedURL = "downloadlink.com"
+		downloader.LogObj.LogToConsole("File Downloaded")
+		downloader.LogObj.LogToConsole(string(out))
+		return &downloadedMediaJson
 	}
 }

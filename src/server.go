@@ -27,7 +27,8 @@ func (server DownloaderServer) initRoutes() {
 	//e.POST("/normal", normal)
 	//e.GET("/pathparam/:id", pathparam)
 	//e.GET("/normal", normal)
-	server._echo.GET("/download", server._downloadVideo)
+	server._echo.GET("/check", server._checkMedia)
+	server._echo.GET("/download", server._downloadMedia)
 	//e.PUT("/users/:id", updateUser)
 	//e.DELETE("/users/:id", deleteUser)
 }
@@ -37,10 +38,18 @@ func (server DownloaderServer) startListening(port int) {
 	server._echo.Logger.Fatal(server._echo.Start(listenPort))
 }
 
-func (server DownloaderServer) _downloadVideo(c echo.Context) error {
+func (server DownloaderServer) _checkMedia(c echo.Context) error {
 	targetUrl := c.QueryParam("targetUrl")
 	availableFormatsJson := server._downloader.CheckAvailableFormats(targetUrl)
-	server.LogObj.LogToConsole("JSON Response Received")
+	server.LogObj.LogToConsole("_checkMedia: JSON Response Received")
+	return c.JSON(http.StatusOK, availableFormatsJson)
+}
+
+func (server DownloaderServer) _downloadMedia(c echo.Context) error {
+	targetUrl := c.QueryParam("targetUrl")
+	targetFormatCode := c.QueryParam("targetFormatCode")
+	availableFormatsJson := server._downloader.BeginDownload(targetUrl, targetFormatCode)
+	server.LogObj.LogToConsole("_downloadMedia: JSON Response Received")
 	return c.JSON(http.StatusOK, availableFormatsJson)
 }
 
